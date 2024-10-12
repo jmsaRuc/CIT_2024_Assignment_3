@@ -10,4 +10,4 @@ dotnet run
 ```
 ## how meny test have been done so far
 
-![alt text](https://github.com/jmsaRuc/CIT_2024_Assignment_3/blob/jens2/test_so_far.png?raw=true)
+![alt text](https://github.com/jmsaRuc/CIT_2024_Assignment_3/blob/main/test_so_far.png?raw=true)
