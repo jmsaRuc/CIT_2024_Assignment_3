@@ -10,7 +10,6 @@ using Xunit;
 
 namespace Assignment3TestSuite
 {
-
     public class Response
     {
         public string Status { get; set; }
@@ -21,6 +20,7 @@ namespace Assignment3TestSuite
     {
         [JsonPropertyName("cid")]
         public int Id { get; set; }
+
         [JsonPropertyName("name")]
         public string Name { get; set; }
     }
@@ -29,12 +29,11 @@ namespace Assignment3TestSuite
     {
         private const int Port = 5000;
 
-
         //////////////////////////////////////////////////////////
-        /// 
+        ///
         /// Testing Constrains
-        /// 
-        ////////////////////////////////////////////////////////// 
+        ///
+        //////////////////////////////////////////////////////////
 
         [Fact]
         public void Constraint_ConnectionWithoutRequest_ShouldConnect()
@@ -67,7 +66,7 @@ namespace Assignment3TestSuite
                 Method = "xxxx",
                 Path = "testing",
                 Date = UnixTimestamp(),
-                Body = "{}"
+                Body = "{}",
             };
 
             client.SendRequest(request.ToJson());
@@ -76,20 +75,21 @@ namespace Assignment3TestSuite
             Assert.Contains("illegal method", response.Status.ToLower());
         }
 
-
         [Theory]
         [InlineData("create")]
         [InlineData("read")]
         [InlineData("update")]
         [InlineData("delete")]
-        public void Constraint_RequestForCreateReadUpdateDeleteWithoutResource_MissingResourceError(string method)
+        public void Constraint_RequestForCreateReadUpdateDeleteWithoutResource_MissingResourceError(
+            string method
+        )
         {
             var client = Connect();
 
             var request = new
             {
                 Method = method,
-                Date = DateTimeOffset.Now.ToUnixTimeSeconds().ToString()
+                Date = DateTimeOffset.Now.ToUnixTimeSeconds().ToString(),
             };
 
             client.SendRequest(request.ToJson());
@@ -123,7 +123,7 @@ namespace Assignment3TestSuite
                 Method = "update",
                 Path = "testing",
                 Date = DateTimeOffset.Now.ToString(),
-                Body = (new { cid = 1, Name = "Beverages"}).ToJson()
+                Body = (new { cid = 1, Name = "Beverages" }).ToJson(),
             };
 
             client.SendRequest(request.ToJson());
@@ -146,7 +146,7 @@ namespace Assignment3TestSuite
             {
                 Method = method,
                 Path = "testing",
-                Date = UnixTimestamp()
+                Date = UnixTimestamp(),
             };
 
             client.SendRequest(request.ToJson());
@@ -155,7 +155,6 @@ namespace Assignment3TestSuite
             Assert.Contains("missing body", response.Status.ToLower());
         }
 
-        
         [Fact]
         public void Constraint_RequestUpdateWithoutJsonBody_IllegalBodyError()
         {
@@ -166,15 +165,13 @@ namespace Assignment3TestSuite
                 Method = "update",
                 Path = "/api/categories/1",
                 Date = UnixTimestamp(),
-                Body = "Hello World"
+                Body = "Hello World",
             };
 
             client.SendRequest(request.ToJson());
             var response = client.ReadResponse();
 
-
             Assert.Contains("illegal body", response.Status.ToLower());
-
         }
 
         /* Echo Test */
@@ -187,23 +184,24 @@ namespace Assignment3TestSuite
             {
                 Method = "echo",
                 Date = UnixTimestamp(),
-                Body = "Hello World"
+                Body = "Hello World",
             };
 
             client.SendRequest(request.ToJson());
             var response = client.ReadResponse();
 
             Assert.Equal("Hello World", response.Body);
-
         }
 
         //////////////////////////////////////////////////////////
-        /// 
-        /// Testing API 
-        /// 
-        ////////////////////////////////////////////////////////// 
+        ///
+        /// Testing API
+        ///
+        //////////////////////////////////////////////////////////
 
         /* Path tests  */
+
+        /* changed the test to look for more then "just" 4 bad request */
 
         [Fact]
         public void Constraint_RequestWithInvalidPath_StatusBadRequest()
@@ -214,13 +212,13 @@ namespace Assignment3TestSuite
             {
                 Method = "read",
                 Path = "/api/xxx",
-                Date = UnixTimestamp()
+                Date = UnixTimestamp(),
             };
 
             client.SendRequest(request.ToJson());
             var response = client.ReadResponse();
-            
-            var expectedResponse = new Response { Status = "4 Bad Request" };
+
+            var expectedResponse = new Response { Status = "4 Bad Request, illegal path" };
 
             Assert.Equal(expectedResponse.ToJson().ToLower(), response.ToJson().ToLower());
         }
@@ -234,13 +232,13 @@ namespace Assignment3TestSuite
             {
                 Method = "read",
                 Path = "/api/categories/xxx",
-                Date = UnixTimestamp()
+                Date = UnixTimestamp(),
             };
 
             client.SendRequest(request.ToJson());
             var response = client.ReadResponse();
-            
-            var expectedResponse = new Response { Status = "4 Bad Request" };
+
+            var expectedResponse = new Response { Status = "4 Bad Request, illegal path ID" };
 
             Assert.Equal(expectedResponse.ToJson().ToLower(), response.ToJson().ToLower());
         }
@@ -255,13 +253,13 @@ namespace Assignment3TestSuite
                 Method = "create",
                 Path = "/api/categories/1",
                 Date = UnixTimestamp(),
-                Body = (new { Name = "" }).ToJson()
+                Body = (new { Name = "" }).ToJson(),
             };
 
             client.SendRequest(request.ToJson());
             var response = client.ReadResponse();
-            
-            var expectedResponse = new Response { Status = "4 Bad Request" };
+
+            var expectedResponse = new Response { Status = "4 Bad Request, illegal path with Method create" };
 
             Assert.Equal(expectedResponse.ToJson().ToLower(), response.ToJson().ToLower());
         }
@@ -276,13 +274,13 @@ namespace Assignment3TestSuite
                 Method = "update",
                 Path = "/api/categories",
                 Date = UnixTimestamp(),
-                Body = (new { Name = "" }).ToJson()
+                Body = (new { Name = "" }).ToJson(),
             };
 
             client.SendRequest(request.ToJson());
             var response = client.ReadResponse();
-            
-            var expectedResponse = new Response { Status = "4 Bad Request" };
+
+            var expectedResponse = new Response { Status = "4 Bad Request, illegal path with Method update" };
 
             Assert.Equal(expectedResponse.ToJson().ToLower(), response.ToJson().ToLower());
         }
@@ -296,18 +294,16 @@ namespace Assignment3TestSuite
             {
                 Method = "delete",
                 Path = "/api/categories",
-                Date = UnixTimestamp()
+                Date = UnixTimestamp(),
             };
 
             client.SendRequest(request.ToJson());
             var response = client.ReadResponse();
-            
-            var expectedResponse = new Response { Status = "4 Bad Request" };
+
+            var expectedResponse = new Response { Status = "4 Bad Request, illegal path with Method delete" };
 
             Assert.Equal(expectedResponse.ToJson().ToLower(), response.ToJson().ToLower());
         }
-
-
 
         /* Read tests */
 
@@ -320,24 +316,20 @@ namespace Assignment3TestSuite
             {
                 Method = "read",
                 Path = "/api/categories",
-                Date = UnixTimestamp()
+                Date = UnixTimestamp(),
             };
 
             client.SendRequest(request.ToJson());
             var response = client.ReadResponse();
-            
+
             var categories = new List<object>
             {
-                new {cid = 1, name = "Beverages"},
-                new {cid = 2, name = "Condiments"},
-                new {cid = 3, name = "Confections"}
+                new { cid = 1, name = "Beverages" },
+                new { cid = 2, name = "Condiments" },
+                new { cid = 3, name = "Confections" },
             };
 
-            var expectedResponse = new
-            {
-                Status = "1 Ok",
-                Body = categories.ToJson()
-            };
+            var expectedResponse = new { Status = "1 Ok", Body = categories.ToJson() };
 
             Assert.Equal(expectedResponse.ToJson(), response.ToJson());
         }
@@ -351,16 +343,16 @@ namespace Assignment3TestSuite
             {
                 Method = "read",
                 Path = "/api/categories/1",
-                Date = UnixTimestamp()
+                Date = UnixTimestamp(),
             };
 
             client.SendRequest(request.ToJson());
             var response = client.ReadResponse();
-            
+
             var expectedResponse = new Response
             {
                 Status = "1 Ok",
-                Body = (new { cid = 1, name = "Beverages" }.ToJson())
+                Body = (new { cid = 1, name = "Beverages" }.ToJson()),
             };
 
             Assert.Equal(expectedResponse.ToJson(), response.ToJson());
@@ -375,7 +367,7 @@ namespace Assignment3TestSuite
             {
                 Method = "read",
                 Path = "/api/categories/123",
-                Date = UnixTimestamp()
+                Date = UnixTimestamp(),
             };
 
             client.SendRequest(request.ToJson());
@@ -383,7 +375,6 @@ namespace Assignment3TestSuite
 
             Assert.Contains("5 not found", response.Status.ToLower());
         }
-
 
         /* Update tests  */
 
@@ -397,12 +388,11 @@ namespace Assignment3TestSuite
                 Method = "update",
                 Path = "/api/categories/1",
                 Date = UnixTimestamp(),
-                Body = (new { cid = 1, name = "BeveragesTesting" }).ToJson()
+                Body = (new { cid = 1, name = "BeveragesTesting" }).ToJson(),
             };
 
             client.SendRequest(request.ToJson());
             var response = client.ReadResponse();
-
 
             Assert.Contains("3 updated", response.Status.ToLower());
 
@@ -415,7 +405,7 @@ namespace Assignment3TestSuite
                 Method = "update",
                 Path = "/api/categories/1",
                 Date = UnixTimestamp(),
-                Body = (new { cid = 1, name = "Beverages" }).ToJson()
+                Body = (new { cid = 1, name = "Beverages" }).ToJson(),
             };
 
             client.SendRequest(resetRequest.ToJson());
@@ -432,7 +422,7 @@ namespace Assignment3TestSuite
                 Method = "update",
                 Path = "/api/categories/1",
                 Date = UnixTimestamp(),
-                Body = (new { cid = 1, name = "BeveragesTesting" }).ToJson()
+                Body = (new { cid = 1, name = "BeveragesTesting" }).ToJson(),
             };
 
             client.SendRequest(request.ToJson());
@@ -443,7 +433,7 @@ namespace Assignment3TestSuite
             {
                 Method = "read",
                 Path = "/api/categories/1",
-                Date = UnixTimestamp()
+                Date = UnixTimestamp(),
             };
 
             client.SendRequest(readRequest.ToJson());
@@ -460,7 +450,7 @@ namespace Assignment3TestSuite
                 Method = "update",
                 Path = "/api/categories/1",
                 Date = UnixTimestamp(),
-                Body = (new { cid = 1, name = "Beverages" }).ToJson()
+                Body = (new { cid = 1, name = "Beverages" }).ToJson(),
             };
 
             client.SendRequest(resetRequest.ToJson());
@@ -477,7 +467,7 @@ namespace Assignment3TestSuite
                 Method = "update",
                 Path = "/api/categories/123",
                 Date = UnixTimestamp(),
-                Body = (new { cid = 1, name = "BeveragesTesting" }).ToJson()
+                Body = (new { cid = 1, name = "BeveragesTesting" }).ToJson(),
             };
 
             client.SendRequest(request.ToJson());
@@ -485,7 +475,6 @@ namespace Assignment3TestSuite
 
             Assert.Contains("5 not found", response.Status.ToLower());
         }
-
 
         /* Create Tests  */
 
@@ -499,7 +488,7 @@ namespace Assignment3TestSuite
                 Method = "create",
                 Path = "/api/categories",
                 Date = UnixTimestamp(),
-                Body = (new { name = "Testing" }).ToJson()
+                Body = (new { name = "Testing" }).ToJson(),
             };
 
             client.SendRequest(request.ToJson());
@@ -517,13 +506,12 @@ namespace Assignment3TestSuite
             {
                 Method = "delete",
                 Path = "/api/categories/" + category.Id,
-                Date = UnixTimestamp()
+                Date = UnixTimestamp(),
             };
 
             client.SendRequest(resetRequest.ToJson());
             client.ReadResponse();
         }
-
 
         /* Delete Tests  */
 
@@ -537,7 +525,7 @@ namespace Assignment3TestSuite
                 Method = "create",
                 Path = "/api/categories",
                 Date = UnixTimestamp(),
-                Body = (new { name = "TestingDeleteCategory" }).ToJson()
+                Body = (new { name = "TestingDeleteCategory" }).ToJson(),
             };
 
             client.SendRequest(request.ToJson());
@@ -548,7 +536,7 @@ namespace Assignment3TestSuite
             {
                 Method = "delete",
                 Path = "/api/categories/" + response.Body.FromJson<Category>().Id,
-                Date = UnixTimestamp()
+                Date = UnixTimestamp(),
             };
 
             client.SendRequest(verifyRequest.ToJson());
@@ -565,7 +553,7 @@ namespace Assignment3TestSuite
             {
                 Method = "delete",
                 Path = "/api/categories/1234",
-                Date = UnixTimestamp()
+                Date = UnixTimestamp(),
             };
 
             client.SendRequest(verifyRequest.ToJson());
@@ -574,13 +562,10 @@ namespace Assignment3TestSuite
             Assert.Contains("5 not found", response.Status.ToLower());
         }
 
-
-
-
         /**********************************************************
-         * 
+         *
          *  Helper Methods
-         * 
+         *
         **********************************************************/
 
         private static string UnixTimestamp()
@@ -594,25 +579,30 @@ namespace Assignment3TestSuite
             client.Connect(IPAddress.Loopback, Port);
             return client;
         }
-
     }
 
     /**********************************************************
-    * 
+    *
     *  Helper Clases
-    * 
+    *
     **********************************************************/
 
     public static class Util
     {
         public static string ToJson(this object data)
         {
-            return JsonSerializer.Serialize(data, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+            return JsonSerializer.Serialize(
+                data,
+                new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }
+            );
         }
 
         public static T FromJson<T>(this string element)
         {
-            return JsonSerializer.Deserialize<T>(element, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+            return JsonSerializer.Deserialize<T>(
+                element,
+                new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }
+            );
         }
 
         public static void SendRequest(this TcpClient client, string request)
@@ -633,13 +623,15 @@ namespace Assignment3TestSuite
                 {
                     bytesread = strm.Read(resp, 0, resp.Length);
                     memStream.Write(resp, 0, bytesread);
-
                 } while (bytesread == 2048);
-                
+
                 var responseData = Encoding.UTF8.GetString(memStream.ToArray());
-                return JsonSerializer.Deserialize<Response>(responseData);
+                //return JsonSerializer.Deserialize<Response>(responseData);
                 // if the naming policy is used you need to do the same on the server side
-                //return JsonSerializer.Deserialize<Response>(responseData, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase});
+                return JsonSerializer.Deserialize<Response>(
+                    responseData,
+                    new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }
+                );
             }
         }
     }

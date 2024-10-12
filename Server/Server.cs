@@ -1,8 +1,11 @@
-﻿
-using System.Net.Sockets;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 using System.Net;
+using System.Net.Sockets;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
-using System;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 public class Server
 {
@@ -11,13 +14,10 @@ public class Server
     public Server(int port)
     {
         _port = port;
-
-        
     }
 
-
-    public void Run() { 
- 
+    public void Run()
+    {
         var server = new TcpListener(IPAddress.Loopback, _port); // IPv4 127.0.0.1 IPv6 ::1
         server.Start();
 
@@ -28,19 +28,37 @@ public class Server
             var client = server.AcceptTcpClient();
             Console.WriteLine("Client connected!!!");
 
-            try
-            {
-                var stream = client.GetStream();
-                string msg = ReadFromStream(stream);
-                
-                Console.WriteLine("Message from client: " + msg);
-
-                WriteToStream(stream, msg.ToUpper());
-            }
-            catch { }
-
+            HandleClient(client);
         }
+    }
 
+    private void HandleClient(TcpClient client)
+    {
+        try
+        {
+            var stream = client.GetStream();
+            string msg = ReadFromStream(stream);
+
+            Console.WriteLine("Message from client: " + msg);
+            Console.WriteLine("Message from client: " + FromJson(msg)?.Body);
+
+            var testRequest = new TestRequest(msg);
+            var request = FromJson(msg);
+            if (!testRequest.is_request_valid_message().Equals("Request is valid"))
+            {
+                var respones = new Respones { Status = testRequest.is_request_valid_message() };
+                Console.WriteLine("Response to client: " + ToJson(respones));
+                var json = ToJson(respones);
+                WriteToStream(stream, json);
+            }
+            else if (request?.Method?.Equals("echo") == true) {
+                var respones = new Respones { Status = "1", Body = request.Body};
+                Console.WriteLine("Response to client: " + ToJson(respones));
+                var json = ToJson(respones);
+                WriteToStream(stream, json);
+             }
+        }
+        catch { }
     }
 
     private string ReadFromStream(NetworkStream stream)
@@ -54,5 +72,21 @@ public class Server
     {
         var buffer = Encoding.UTF8.GetBytes(msg);
         stream.Write(buffer);
+    }
+
+    public static string ToJson(Respones? respones)
+    {
+        return JsonSerializer.Serialize(
+            respones,
+            new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }
+        );
+    }
+
+    public static Request? FromJson(string element)
+    {
+        return JsonSerializer.Deserialize<Request>(
+            element,
+            new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }
+        );
     }
 }
