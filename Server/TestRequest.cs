@@ -47,7 +47,11 @@ public class TestRequest(string msg)
                 sb.Append("4 Bad Request, illegal method");
             }
         }
-        else if (request?.Method?.Equals("echo") == true && string.IsNullOrEmpty(request?.Body))
+        else if (
+            request?.Method?.Equals("echo") == false
+            && string.IsNullOrEmpty(request?.Body) == true
+            && string.IsNullOrEmpty(request?.Path) == true
+        )
         {
             if (sb.Length > 0)
             {
@@ -131,9 +135,7 @@ public class TestRequest(string msg)
 
         /*   For Path     */
 
-        if (
-            request?.Path?.StartsWith("/api/categories") == false
-        )
+        if (request?.Path?.StartsWith("/api/categories") == false)
         {
             if (sb.Length > 0)
             {
@@ -143,7 +145,9 @@ public class TestRequest(string msg)
             {
                 sb.Append("4 Bad Request, illegal path");
             }
-        } else if (request?.Method?.Equals("update") == true){
+        }
+        else if (request?.Method?.Equals("update") == true)
+        {
             if (sb.Length > 0)
             {
                 sb.Append(", illegal path with Method update");
@@ -152,7 +156,9 @@ public class TestRequest(string msg)
             {
                 sb.Append("4 Bad Request, illegal path with Method update");
             }
-        } else if (request?.Method?.Equals("delete") == true){
+        }
+        else if (request?.Method?.Equals("delete") == true)
+        {
             if (sb.Length > 0)
             {
                 sb.Append(", illegal path with Method delete");
@@ -170,16 +176,16 @@ public class TestRequest(string msg)
                 _ = int.Parse(values?[3] ?? "");
 
                 if (request?.Method?.Equals("create") == true)
-            {
-                if (sb.Length > 0)
                 {
-                    sb.Append(", illegal path with Method create");
+                    if (sb.Length > 0)
+                    {
+                        sb.Append(", illegal path with Method create");
+                    }
+                    else
+                    {
+                        sb.Append("4 Bad Request, illegal path with Method create");
+                    }
                 }
-                else
-                {
-                    sb.Append("4 Bad Request, illegal path with Method create");
-                }
-            }  
             }
             catch
             {
@@ -191,10 +197,9 @@ public class TestRequest(string msg)
                 {
                     sb.Append("4 Bad Request, illegal path ID");
                 }
-            } 
+            }
         }
 
-        
         _message = sb.ToString();
         if (string.IsNullOrEmpty(_message))
         {
