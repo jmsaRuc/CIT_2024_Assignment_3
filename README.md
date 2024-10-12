@@ -1,1 +1,10 @@
-# CIT_2024_Assignment_3
+# From gruppe CI07
+
+## ignore Assignment_3_Api
+
+# To run 
+
+```sh
+cd Server
+dotnet run
+```
