@@ -495,7 +495,7 @@ namespace Assignment3TestSuite
             var response = client.ReadResponse();
 
             var category = response.Body.FromJson<Category>();
-
+            Console.WriteLine(category.Id + " " + category.Name);
             Assert.Contains("Testing", category.Name);
             Assert.True(category.Id > 0);
 
