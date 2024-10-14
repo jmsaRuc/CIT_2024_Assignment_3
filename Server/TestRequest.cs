@@ -1,9 +1,10 @@
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography.X509Certificates;
+using Server;
 
 public class TestRequest(string msg)
 {
-    private readonly Request? request = Server.FromJson(msg);
+    private readonly Request? request = Main.FromJson<Request>(msg);
     private string _message = "";
 
     public string is_request_valid_message()
@@ -146,7 +147,7 @@ public class TestRequest(string msg)
                 sb.Append("4 Bad Request, illegal path");
             }
         }
-        else if (request?.Method?.Equals("update") == true)
+        else if (request?.Method?.Equals("update") == true && request?.Path?.StartsWith("/api/categories/") == false)
         {
             if (sb.Length > 0)
             {
@@ -157,7 +158,7 @@ public class TestRequest(string msg)
                 sb.Append("4 Bad Request, illegal path with Method update");
             }
         }
-        else if (request?.Method?.Equals("delete") == true)
+        else if (request?.Method?.Equals("delete") == true && request?.Path?.StartsWith("/api/categories/") == false)
         {
             if (sb.Length > 0)
             {

@@ -1,9 +1,10 @@
 ﻿using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using Server;
 
-var server = new Server(5000);
+var main = new Main(5000);
 
-server.Run();
+main.Run();
 
 
